@@ -21,20 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = true;
 
             try {
-                // Aquí llamaremos al endpoint de FastAPI (lo construiremos en el backend pronto)
-                // Por ahora, simulamos la estructura de datos que enviaremos
                 const payload = {
                     correo: correo,
                     password: password
                 };
 
-                // NOTA: Cuando el backend esté listo, descomenta la siguiente línea:
-                // const response = await fetchAPI('/api/auth/login', 'POST', payload);
+                // ¡Llamada real a la API!
+                const response = await fetchAPI('/api/auth/login', 'POST', payload);
 
-                // SIMULACIÓN TEMPORAL para poder avanzar al dashboard visualmente:
-                const response = { token: "fake_jwt_token", rol: "doctor", nombre: "Dr. Prueba" };
-
-                // Guardar datos en el navegador
+                // Guardar datos reales en el navegador
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('rol', response.rol);
                 localStorage.setItem('nombre', response.nombre);
