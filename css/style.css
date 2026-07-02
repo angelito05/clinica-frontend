@@ -1,0 +1,110 @@
+/* ==========================================================================
+   Importación de Fuentes (Inter y Montserrat)
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;700&family=Montserrat:wght@400;500&display=swap');
+
+/* ==========================================================================
+   Tokens de Diseño (Paleta de Colores de Cosenθ)
+   ========================================================================== */
+:root {
+    /* Brand Colors */
+    --clr-accent: #00A693;
+    /* Verde Azulado Principal */
+    --clr-dark: #002D4C;
+    /* Azul Marino para textos oscuros */
+
+    /* Action Colors */
+    --clr-action: #004D7F;
+    /* Azul Médico Oscurecido (WCAG AAA) */
+    --clr-action-hover: #00375b;
+    /* Versión ligeramente más oscura para el hover */
+
+    /* Semantic Colors */
+    --clr-success: #2ECC71;
+    --clr-danger: #E74C3C;
+
+    /* Neutrals */
+    --clr-bg-app: #F8F9FA;
+    --clr-surface: #FFFFFF;
+    --clr-placeholder: #95A5A6;
+
+    /* Typography */
+    --font-heading: 'Inter', sans-serif;
+    --font-body: 'Montserrat', sans-serif;
+}
+
+/* ==========================================================================
+   Estilos Base y Tipografía
+   ========================================================================== */
+body {
+    font-family: var(--font-body);
+    font-weight: 400;
+    color: var(--clr-dark);
+    background-color: var(--clr-bg-app);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--clr-dark);
+}
+
+/* Para subtítulos o jerarquías secundarias en Inter */
+.font-semibold {
+    font-weight: 600 !important;
+}
+
+/* ==========================================================================
+   Componentes Personalizados (Sobreescribiendo Bootstrap)
+   ========================================================================== */
+
+/* Botones Principales */
+.btn-primary {
+    background-color: var(--clr-action);
+    border-color: var(--clr-action);
+    font-family: var(--font-body);
+    font-weight: 500;
+    color: #FFFFFF;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--clr-action-hover);
+    border-color: var(--clr-action-hover);
+    box-shadow: 0 4px 12px rgba(0, 77, 127, 0.2);
+}
+
+/* Inputs de Formularios */
+.form-control {
+    font-family: var(--font-body);
+    color: var(--clr-dark);
+    border-color: #e0e0e0;
+}
+
+.form-control::placeholder {
+    color: var(--clr-placeholder);
+}
+
+.form-control:focus {
+    border-color: var(--clr-accent);
+    box-shadow: 0 0 0 0.25rem rgba(0, 166, 147, 0.25);
+}
+
+/* Clases utilitarias personalizadas */
+.text-accent {
+    color: var(--clr-accent) !important;
+}
+
+.bg-dark-brand {
+    background-color: var(--clr-dark) !important;
+}
+
+.text-danger-brand {
+    color: var(--clr-danger) !important;
+}
