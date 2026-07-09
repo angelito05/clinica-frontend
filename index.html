@@ -4,25 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso | SistemaIA_Salud por Cosenθ</title>
+    <title>Acceso | SistemaIA_Salud</title>
 
+    <!-- Tipografías Oficiales: Inter (Títulos) y Montserrat (Cuerpo) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700&family=Montserrat:wght@400;500&display=swap"
         rel="stylesheet">
 
+    <!-- Retícula y utilidades base (Bootstrap 5) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- Librería de Íconos: Lucide -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Conexión a tu archivo de estilos -->
     <link rel="stylesheet" href="css/styles.css">
 
     <style>
-        /* Aplicación estricta de la guía de estilos a nivel documento */
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: #F8F9FA;
-            /* Gris ultra claro para resaltar tarjetas */
             color: #002D4C;
         }
 
@@ -38,7 +40,6 @@
 
         .btn-brand {
             background-color: #004D7F;
-            /* Azul oscuro WCAG AAA */
             border-color: #004D7F;
             color: #FFFFFF;
             font-weight: 500;
@@ -62,7 +63,7 @@
     </style>
 </head>
 
-<body class="d-flex align-items-center" style="min-height: 100vh;">
+<body class="d-flex align-items-center py-5" style="min-height: 100vh;">
 
     <div class="container" style="max-width: 1200px;">
         <div class="row justify-content-center">
@@ -72,6 +73,7 @@
                 <div class="card shadow-sm border-0 rounded-4" style="background-color: #FFFFFF;">
                     <div class="card-body p-4 p-md-5">
 
+                        <!-- Logotipo y Branding -->
                         <div class="text-center mb-5">
                             <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
                                 style="width: 64px; height: 64px; background-color: #002D4C;">
@@ -81,11 +83,9 @@
                             <h2 class="mb-0" style="color: #002D4C;">
                                 SistemaIA_<span style="color: #00A693;">Salud</span>
                             </h2>
-                            <p class="text-muted small mt-1" style="font-size: 0.85rem;">
-                                Un proyecto de <strong style="color: #002D4C;">Cosenθ</strong>
-                            </p>
                         </div>
 
+                        <!-- Formulario de Autenticación -->
                         <form id="loginForm">
                             <div class="mb-4">
                                 <label for="correo" class="form-label"
@@ -98,12 +98,12 @@
                                             height="20"></i>
                                     </span>
                                     <input type="email" class="form-control border-start-0 ps-0" id="correo"
-                                        placeholder="doctor@clinica.com" style="color: #002D4C; box-shadow: none;"
+                                        placeholder="usuario@clinica.com" style="color: #002D4C; box-shadow: none;"
                                         required>
                                 </div>
                             </div>
 
-                            <div class="mb-5">
+                            <div class="mb-4">
                                 <label for="password" class="form-label"
                                     style="font-weight: 500; font-size: 0.9rem; color: #002D4C;">
                                     Contraseña
@@ -118,11 +118,22 @@
                                 </div>
                             </div>
 
+                            <!-- Botón Principal -->
                             <button type="submit" class="btn btn-brand w-100 py-2 rounded-3 shadow-sm">
                                 Iniciar Sesión
                             </button>
                         </form>
 
+                        <!-- NUEVO: Enlace de redirección al registro -->
+                        <div class="text-center mt-4">
+                            <p class="text-muted small mb-0">
+                                ¿No tienes cuenta?
+                                <a href="registro.html" class="text-decoration-none fw-semibold"
+                                    style="color: #004D7F;">Regístrate aquí</a>
+                            </p>
+                        </div>
+
+                        <!-- Alerta de Error -->
                         <div id="errorAlert" class="alert mt-4 d-none text-center rounded-3"
                             style="background-color: #FDEDEC; color: #E74C3C; border: 1px solid #F5B7B1; font-weight: 500; font-size: 0.9rem;"
                             role="alert">
@@ -134,10 +145,10 @@
         </div>
     </div>
 
+    <!-- Scripts -->
     <script>
         lucide.createIcons();
     </script>
-
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
 </body>
