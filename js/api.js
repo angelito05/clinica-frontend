@@ -2,11 +2,11 @@
 
 const BACKEND_URL = "http://127.0.0.1:8000";
 
-async function fetchAPI(endpoint, method = 'GET', body = null, token = null) {
-    const headers = {
-        'Content-Type': 'application/json',
-    };
+async function fetchAPI(endpoint, method = 'GET', body = null) {
+    const headers = {};
 
+    // Obtener el token de localStorage automáticamente
+    const token = localStorage.getItem('token');
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
@@ -17,7 +17,17 @@ async function fetchAPI(endpoint, method = 'GET', body = null, token = null) {
     };
 
     if (body && method !== 'GET') {
-        config.body = JSON.stringify(body);
+        if (body instanceof FormData) {
+            // Si es FormData, el navegador asigna automáticamente el Content-Type (incluyendo el boundary)
+            config.body = body;
+        } else if (body instanceof URLSearchParams) {
+            // Si es URLSearchParams, el navegador asigna el Content-Type application/x-www-form-urlencoded
+            config.body = body;
+        } else {
+            // Si es un objeto, lo mandamos como JSON
+            headers['Content-Type'] = 'application/json';
+            config.body = JSON.stringify(body);
+        }
     }
 
     try {

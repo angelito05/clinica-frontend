@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Laboratorio | SistemaIA_Salud</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg shadow-sm" style="background-color: var(--clr-surface);">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i data-lucide="microscope" color="var(--clr-accent)" stroke-width="1.5" width="28" height="28"
+                    class="me-2"></i>
+                <span class="font-semibold" style="color: var(--clr-dark);">Laboratorio_<span
+                        class="text-accent">Salud</span></span>
+            </a>
+
+            <div class="d-flex align-items-center">
+                <span class="me-3 font-body text-muted small" id="userNameDisplay">Cargando perfil...</span>
+                <button class="btn btn-sm btn-outline-danger d-flex align-items-center gap-2 rounded-3"
+                    onclick="cerrarSesion()">
+                    <i data-lucide="log-out" stroke-width="1.5" width="16" height="16"></i>
+                    Salir
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5" style="max-width: 900px;">
+        <div class="card shadow-sm border-0 rounded-4" style="background-color: #FFFFFF;">
+            <div class="card-body p-4 p-md-5">
+                <h4 style="color: #002D4C;" class="mb-4 d-flex align-items-center gap-2">
+                    <i data-lucide="file-up" color="#00A693"></i> Cargar Resultados de Laboratorio
+                </h4>
+
+                <form id="form-subir-estudio">
+                    <!-- Buscador de paciente -->
+                    <div class="mb-4">
+                        <label class="form-label small text-muted fw-bold">1. Buscar Paciente</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i data-lucide="search" width="18"></i></span>
+                            <input type="text" class="form-control border-start-0" id="search-paciente" placeholder="Escribe el nombre del paciente...">
+                            <button class="btn btn-brand" type="button" id="btn-buscar-paciente">Buscar</button>
+                        </div>
+                        <div id="resultados-busqueda" class="list-group mt-2 d-none shadow-sm position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                            <!-- Resultados inyectados aquí -->
+                        </div>
+                        <input type="hidden" id="paciente-id-seleccionado" required>
+                        <div id="paciente-seleccionado-info" class="mt-2 text-success small d-none">
+                            <i data-lucide="check-circle" width="16" class="me-1"></i> Paciente seleccionado: <strong><span id="nombre-paciente-seleccionado"></span></strong>
+                        </div>
+                    </div>
+
+                    <!-- Datos del estudio -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted fw-bold">2. Tipo de Estudio</label>
+                            <select class="form-select" id="tipo-estudio" required>
+                                <option value="">Seleccione...</option>
+                                <option value="Química Sanguínea">Química Sanguínea</option>
+                                <option value="Biometría Hemática">Biometría Hemática</option>
+                                <option value="Examen General de Orina">Examen General de Orina</option>
+                                <option value="Rayos X">Rayos X</option>
+                                <option value="Ultrasonido">Ultrasonido</option>
+                                <option value="Resonancia Magnética">Resonancia Magnética</option>
+                                <option value="Tomografía">Tomografía</option>
+                                <option value="Electrocardiograma">Electrocardiograma</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted fw-bold">3. Archivo (PDF, JPG, PNG)</label>
+                            <input class="form-control" type="file" id="archivo-estudio" accept=".pdf,.jpg,.jpeg,.png" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small text-muted fw-bold">4. Notas (Opcional)</label>
+                            <textarea class="form-control" id="notas-laboratorio" rows="2" placeholder="Observaciones adicionales sobre el estudio..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-brand rounded-3 px-4 py-2 fw-bold d-flex align-items-center gap-2 ms-auto" id="btn-submit">
+                            <i data-lucide="upload-cloud" width="18"></i> Subir Estudio
+                        </button>
+                    </div>
+                    <div id="mensaje-exito" class="alert alert-success mt-3 d-none">
+                        Estudio cargado exitosamente.
+                    </div>
+                    <div id="mensaje-error" class="alert alert-danger mt-3 d-none">
+                        Error al cargar.
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const rol = localStorage.getItem('rol');
+            if (rol !== 'laboratorio') {
+                alert("Acceso denegado. Esta área es exclusiva para laboratorio.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const nombre = localStorage.getItem('nombre') || 'Laboratorio';
+            document.getElementById('userNameDisplay').textContent = nombre;
+        });
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+    <script src="js/api.js"></script>
+    <script src="js/laboratorio.js"></script>
+</body>
+
+</html>
