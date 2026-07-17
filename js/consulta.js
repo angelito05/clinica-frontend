@@ -33,15 +33,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('print-doctor-cedula').textContent = localStorage.getItem('cedula') || 'No registrada';
     document.getElementById('print-fecha').textContent = new Date().toLocaleDateString('es-ES');
 
-    // Manejo Paso 1
-    document.getElementById('form-consulta-paso1').addEventListener('submit', async (e) => {
+    // Manejo de la grabación
+    const btnGrabar = document.getElementById('btn-grabar');
+    btnGrabar.addEventListener('click', toggleGrabacion);
+
+    // Saltar audio
+    document.getElementById('btn-skip-audio').addEventListener('click', () => {
+        mostrarPaso2({});
+    });
+
+    // Añadir medicamento manual
+    document.getElementById('btn-add-medicamento').addEventListener('click', () => {
+        agregarCampoMedicamento();
+    });
+
+    // Guardar Consulta y Receta
+    document.getElementById('form-guardar-consulta').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button');
         btn.disabled = true;
 
-        const payload = {
+        // 1. Preparar datos de la Consulta
+        const payloadConsulta = {
             paciente_id: pacienteId,
-            motivo_consulta: document.getElementById('form-motivo').value,
+            motivo_consulta: document.getElementById('form-motivo').value || "No especificado",
+            sintomas: document.getElementById('form-sintomas').value,
+            diagnostico: document.getElementById('receta-diagnostico').value,
             signos_vitales: {
                 peso: document.getElementById('form-peso').value,
                 talla: document.getElementById('form-talla').value,
@@ -50,40 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        // Rellenar datos de impresión
-        document.getElementById('print-peso').textContent = payload.signos_vitales.peso + ' kg';
-        document.getElementById('print-talla').textContent = payload.signos_vitales.talla + ' cm';
-        document.getElementById('print-temperatura').textContent = payload.signos_vitales.temperatura + ' °C';
-        document.getElementById('print-presion').textContent = payload.signos_vitales.presion_arterial;
-
-        try {
-            const resp = await fetchAPI('/api/v1/consultas/', 'POST', payload);
-            consultaId = resp.id || resp._id; // Ajustar según respuesta real
-            
-            // Avanzar al Paso 2
-            document.getElementById('paso-1').classList.remove('active');
-            document.getElementById('paso-2').classList.add('active');
-        } catch (error) {
-            alert("Error al crear consulta: " + error.message);
-        } finally {
-            btn.disabled = false;
-        }
-    });
-
-    // Manejo Paso 2 (Audio)
-    const btnGrabar = document.getElementById('btn-grabar');
-    btnGrabar.addEventListener('click', toggleGrabacion);
-
-    // Manejo Paso 3 (Receta)
-    document.getElementById('btn-add-medicamento').addEventListener('click', () => {
-        agregarCampoMedicamento();
-    });
-
-    document.getElementById('form-guardar-receta').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button');
-        btn.disabled = true;
-
+        // 2. Preparar datos de la Receta
         const medsInputs = document.querySelectorAll('.med-item');
         const medicamentos = [];
         medsInputs.forEach(item => {
@@ -95,27 +79,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
 
-        const payload = {
-            diagnostico: document.getElementById('receta-diagnostico').value,
+        const payloadReceta = {
+            diagnostico: payloadConsulta.diagnostico,
             medicamentos: medicamentos,
             indicaciones_adicionales: document.getElementById('receta-indicaciones').value,
-            paciente_id: pacienteId,
-            consulta_id: consultaId
+            paciente_id: pacienteId
         };
 
         try {
-            await fetchAPI('/api/v1/recetas/guardar', 'POST', payload);
+            // A. Guardar Consulta
+            const respConsulta = await fetchAPI('/api/v1/consultas/', 'POST', payloadConsulta);
+            consultaId = respConsulta.id || respConsulta._id;
+
+            // B. Guardar Receta vinculada
+            payloadReceta.consulta_id = consultaId;
+            await fetchAPI('/api/v1/recetas/guardar', 'POST', payloadReceta);
             
-            // Preparar e imprimir
-            prepararImpresion(payload);
+            // C. Preparar e imprimir
+            prepararImpresion(payloadConsulta, payloadReceta);
             
-            // Al terminar la impresión, redirigir
+            // Redirigir al expediente
             setTimeout(() => {
                 window.location.href = `paciente.html?id=${pacienteId}`;
             }, 1000);
             
         } catch (error) {
-            alert("Error al guardar receta: " + error.message);
+            alert("Error al guardar: " + error.message);
             btn.disabled = false;
         }
     });
@@ -125,6 +114,7 @@ async function toggleGrabacion() {
     const btnGrabar = document.getElementById('btn-grabar');
     const estadoText = document.getElementById('estado-grabacion');
     const indicacionText = document.getElementById('indicacion-detener');
+    const btnSkip = document.getElementById('btn-skip-audio');
     
     if (!isRecording) {
         // Iniciar grabación
@@ -139,7 +129,6 @@ async function toggleGrabacion() {
             };
 
             mediaRecorder.onstop = async () => {
-                // Detener todas las pistas del stream para apagar la luz del mic
                 if (streamGlobal) {
                     streamGlobal.getTracks().forEach(track => track.stop());
                 }
@@ -147,32 +136,33 @@ async function toggleGrabacion() {
                 estadoText.textContent = "Procesando...";
                 indicacionText.classList.add('d-none');
                 btnGrabar.classList.add('d-none');
+                btnSkip.classList.add('d-none');
                 document.getElementById('loader-ia').classList.remove('d-none');
 
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                 const formData = new FormData();
-                // El campo esperado en el backend es 'audio' (revisar FastAPI, si espera archivo será type File)
-                formData.append('audio', audioBlob, 'receta.webm');
+                formData.append('audio', audioBlob, 'consulta.webm');
 
                 try {
-                    // Espera multipart formData. fetchAPI ya maneja esto si no stringifica
-                    const resp = await fetchAPI('/api/v1/recetas/procesar_audio', 'POST', formData);
-                    mostrarPaso3(resp);
+                    // LLamada al nuevo endpoint completo
+                    const resp = await fetchAPI('/api/v1/consultas/procesar_audio', 'POST', formData);
+                    mostrarPaso2(resp);
                 } catch (error) {
                     alert("Error procesando audio: " + error.message);
-                    // Reiniciar vista
                     btnGrabar.classList.remove('d-none');
+                    btnSkip.classList.remove('d-none');
                     document.getElementById('loader-ia').classList.add('d-none');
-                    estadoText.textContent = "Listo para grabar";
+                    estadoText.textContent = "Listo para grabar la consulta";
                 }
             };
 
             mediaRecorder.start();
             isRecording = true;
             btnGrabar.classList.add('recording');
-            estadoText.textContent = "Grabando receta...";
+            estadoText.textContent = "Escuchando consulta...";
             estadoText.style.color = "#E74C3C";
             indicacionText.classList.remove('d-none');
+            btnSkip.classList.add('d-none');
 
         } catch (error) {
             alert("No se pudo acceder al micrófono: " + error.message);
@@ -186,18 +176,25 @@ async function toggleGrabacion() {
     }
 }
 
-function mostrarPaso3(datosReceta) {
-    document.getElementById('paso-2').classList.remove('active');
-    document.getElementById('paso-3').classList.add('active');
+function mostrarPaso2(datosIA) {
+    document.getElementById('paso-1').classList.remove('active');
+    document.getElementById('paso-2').classList.add('active');
 
-    document.getElementById('receta-diagnostico').value = datosReceta.diagnostico || '';
-    document.getElementById('receta-indicaciones').value = datosReceta.indicaciones_adicionales || '';
+    // Rellenar campos de la UI si la IA los detectó
+    document.getElementById('form-motivo').value = (datosIA.motivo_consulta !== "No especificado") ? (datosIA.motivo_consulta || '') : '';
+    document.getElementById('form-sintomas').value = (datosIA.sintomas !== "No especificado") ? (datosIA.sintomas || '') : '';
+    document.getElementById('form-peso').value = datosIA.peso || '';
+    document.getElementById('form-talla').value = datosIA.talla || '';
+    document.getElementById('form-temperatura').value = datosIA.temperatura || '';
+    document.getElementById('form-presion').value = datosIA.presion_arterial || '';
+    document.getElementById('receta-diagnostico').value = (datosIA.diagnostico !== "No especificado") ? (datosIA.diagnostico || '') : '';
+    document.getElementById('receta-indicaciones').value = (datosIA.indicaciones_adicionales !== "Ninguna") ? (datosIA.indicaciones_adicionales || '') : '';
 
     const contenedorMeds = document.getElementById('contenedor-medicamentos');
     contenedorMeds.innerHTML = '';
 
-    if (datosReceta.medicamentos && datosReceta.medicamentos.length > 0) {
-        datosReceta.medicamentos.forEach(med => agregarCampoMedicamento(med));
+    if (datosIA.medicamentos && datosIA.medicamentos.length > 0) {
+        datosIA.medicamentos.forEach(med => agregarCampoMedicamento(med));
     } else {
         agregarCampoMedicamento();
     }
@@ -231,13 +228,21 @@ function agregarCampoMedicamento(med = { nombre: '', dosis: '', frecuencia: '', 
     contenedor.appendChild(div);
 }
 
-function prepararImpresion(payload) {
-    document.getElementById('print-diagnostico').textContent = payload.diagnostico;
-    document.getElementById('print-indicaciones').textContent = payload.indicaciones_adicionales || '-';
+function prepararImpresion(payloadConsulta, payloadReceta) {
+    // Signos Vitales
+    document.getElementById('print-peso').textContent = payloadConsulta.signos_vitales.peso ? payloadConsulta.signos_vitales.peso + ' kg' : '-';
+    document.getElementById('print-talla').textContent = payloadConsulta.signos_vitales.talla ? payloadConsulta.signos_vitales.talla + ' cm' : '-';
+    document.getElementById('print-temperatura').textContent = payloadConsulta.signos_vitales.temperatura ? payloadConsulta.signos_vitales.temperatura + ' °C' : '-';
+    document.getElementById('print-presion').textContent = payloadConsulta.signos_vitales.presion_arterial || '-';
+
+    // Diagnóstico
+    document.getElementById('print-diagnostico').textContent = payloadReceta.diagnostico;
+    document.getElementById('print-indicaciones').textContent = payloadReceta.indicaciones_adicionales || '-';
     
+    // Medicamentos
     const printMeds = document.getElementById('print-medicamentos');
     printMeds.innerHTML = '';
-    payload.medicamentos.forEach(m => {
+    payloadReceta.medicamentos.forEach(m => {
         const p = document.createElement('p');
         p.className = 'mb-1';
         p.innerHTML = `<strong>${m.nombre}</strong> - ${m.dosis} <br> <small class="text-muted">Tomar ${m.frecuencia} durante ${m.duracion}</small>`;

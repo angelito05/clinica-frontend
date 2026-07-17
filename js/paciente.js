@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarDatosPaciente(pacienteId);
     cargarHistorialConsultas(pacienteId);
     cargarEstudiosPaciente(pacienteId);
+    cargarResumenIA(pacienteId);
 
     const btnNuevaConsulta = document.getElementById('btn-nueva-consulta');
     if (btnNuevaConsulta) {
@@ -245,3 +246,21 @@ function calcularEdad(fechaNacimiento) {
     }
     return edad;
 }
+
+async function cargarResumenIA(pacienteId) {
+    const resumenElement = document.getElementById('resumen-ia-texto');
+    try {
+        const respuesta = await fetchAPI(`/api/v1/consultas/paciente/${pacienteId}/resumen`);
+        if (respuesta && respuesta.resumen) {
+            resumenElement.innerHTML = `<strong>Contexto Rápido:</strong> ${respuesta.resumen}`;
+            resumenElement.classList.remove('text-muted');
+            resumenElement.classList.add('text-dark');
+        } else {
+            resumenElement.innerHTML = 'No se pudo generar el resumen.';
+        }
+    } catch (error) {
+        console.error("Error cargando resumen IA:", error);
+        resumenElement.innerHTML = 'El resumen no está disponible temporalmente.';
+    }
+}
+

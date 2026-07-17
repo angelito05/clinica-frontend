@@ -68,54 +68,17 @@
     <div class="container mt-5" style="max-width: 900px;" id="contenedor-principal">
         <h3 style="color: #002D4C;" class="mb-4 text-center">Consulta Médica: <span id="nombre-paciente-display" class="text-accent">...</span></h3>
 
-        <!-- PASO 1: Signos Vitales y Motivo -->
+        <!-- PASO 1: Escribano Clínico (Grabación) -->
         <div id="paso-1" class="step-container active">
-            <div class="card shadow-sm border-0 rounded-4" style="background-color: #FFFFFF;">
-                <div class="card-body p-4 p-md-5">
-                    <h5 style="color: #002D4C;" class="mb-4">
-                        <i data-lucide="activity" class="me-2" color="#00A693"></i> Paso 1: Signos Vitales y Motivo
-                    </h5>
-                    <form id="form-consulta-paso1">
-                        <div class="mb-4">
-                            <label class="form-label small text-muted fw-bold">Motivo de Consulta (Síntoma Principal)</label>
-                            <input type="text" class="form-control" id="form-motivo" required placeholder="Ej. Dolor de cabeza severo">
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-6 col-md-3">
-                                <label class="form-label small text-muted fw-bold">Peso (kg)</label>
-                                <input type="number" step="0.1" class="form-control" id="form-peso" required>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <label class="form-label small text-muted fw-bold">Talla (cm)</label>
-                                <input type="number" step="1" class="form-control" id="form-talla" required>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <label class="form-label small text-muted fw-bold">Temperatura (°C)</label>
-                                <input type="number" step="0.1" class="form-control" id="form-temperatura" required>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <label class="form-label small text-muted fw-bold">Presión Art.</label>
-                                <input type="text" class="form-control" id="form-presion" placeholder="120/80" required>
-                            </div>
-                        </div>
-                        <div class="mt-5 text-end">
-                            <button type="submit" class="btn btn-brand rounded-3 px-4 py-2 fw-bold">Continuar <i data-lucide="arrow-right" class="ms-2" width="18"></i></button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- PASO 2: Receta Inteligente por Voz -->
-        <div id="paso-2" class="step-container">
             <div class="card shadow-sm border-0 rounded-4" style="background-color: #FFFFFF;">
                 <div class="card-body p-4 p-md-5 text-center">
                     <h5 style="color: #002D4C;" class="mb-3">
-                        <i data-lucide="mic" class="me-2" color="#00A693"></i> Paso 2: Dictado de Receta
+                        <i data-lucide="mic" class="me-2" color="#00A693"></i> Paso 1: Escribano Clínico por Voz
                     </h5>
                     <p class="text-muted small mb-5">
-                        Presiona el micrófono y dicta el diagnóstico junto con los medicamentos y dosis.<br>
-                        La IA estructurará la receta automáticamente.
+                        Presiona el micrófono y atiende a tu paciente con normalidad.<br>
+                        Menciona los signos vitales, el diagnóstico y el tratamiento en voz alta.<br>
+                        La IA extraerá toda la historia clínica automáticamente.
                     </p>
 
                     <div class="d-flex justify-content-center mb-4">
@@ -124,46 +87,82 @@
                         </div>
                     </div>
                     
-                    <h6 id="estado-grabacion" class="fw-bold" style="color: #002D4C;">Listo para grabar</h6>
+                    <h6 id="estado-grabacion" class="fw-bold" style="color: #002D4C;">Listo para grabar la consulta</h6>
                     <p id="indicacion-detener" class="text-muted small d-none mt-2">Vuelve a hacer clic para detener y procesar</p>
 
-                    <!-- Loader mientras la IA procesa -->
                     <div id="loader-ia" class="d-none mt-4">
                         <div class="spinner-border text-accent mb-2" role="status"></div>
-                        <p class="fw-bold text-muted small">La IA está procesando el audio...</p>
+                        <p class="fw-bold text-muted small">La IA está procesando la consulta completa...</p>
+                    </div>
+                    
+                    <div class="mt-5 border-top pt-4">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-skip-audio">
+                            Saltar y escribir manualmente
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PASO 3: Edición y Guardado de Receta -->
-        <div id="paso-3" class="step-container">
+        <!-- PASO 2: Revisión Total (Expediente y Receta) -->
+        <div id="paso-2" class="step-container">
             <div class="card shadow-sm border-0 rounded-4" style="background-color: #FFFFFF;">
                 <div class="card-body p-4 p-md-5">
                     <h5 style="color: #002D4C;" class="mb-4">
-                        <i data-lucide="file-signature" class="me-2" color="#00A693"></i> Paso 3: Revisión de la Receta
+                        <i data-lucide="file-signature" class="me-2" color="#00A693"></i> Paso 2: Revisión de la Consulta
                     </h5>
                     
-                    <form id="form-guardar-receta">
-                        <!-- Diagnóstico Médico -->
+                    <form id="form-guardar-consulta">
+                        
+                        <!-- SECCIÓN 1: Motivo y Síntomas -->
+                        <h6 style="color: #00A693;" class="mb-3 border-bottom pb-2">Historia Clínica</h6>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-bold">Motivo de Consulta</label>
+                            <input type="text" class="form-control" id="form-motivo" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small text-muted fw-bold">Síntomas / Exploración</label>
+                            <textarea class="form-control" id="form-sintomas" rows="2"></textarea>
+                        </div>
+
+                        <!-- SECCIÓN 2: Signos Vitales -->
+                        <h6 style="color: #00A693;" class="mb-3 border-bottom pb-2">Signos Vitales</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small text-muted fw-bold">Peso (kg)</label>
+                                <input type="number" step="0.1" class="form-control" id="form-peso">
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small text-muted fw-bold">Talla (cm)</label>
+                                <input type="number" step="1" class="form-control" id="form-talla">
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small text-muted fw-bold">Temperatura (°C)</label>
+                                <input type="number" step="0.1" class="form-control" id="form-temperatura">
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small text-muted fw-bold">Presión Art.</label>
+                                <input type="text" class="form-control" id="form-presion">
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 3: Diagnóstico y Receta -->
+                        <h6 style="color: #00A693;" class="mb-3 border-bottom pb-2">Diagnóstico y Tratamiento</h6>
                         <div class="mb-4">
                             <label class="form-label small text-muted fw-bold">Diagnóstico Principal</label>
                             <input type="text" class="form-control" id="receta-diagnostico" required>
                         </div>
 
-                        <!-- Medicamentos -->
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 style="color: #00A693;" class="mb-0">Tratamiento Farmacológico</h6>
+                            <label class="form-label small text-muted fw-bold mb-0">Medicamentos</label>
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-add-medicamento">
                                 + Añadir
                             </button>
                         </div>
-                        
                         <div id="contenedor-medicamentos" class="mb-4">
-                            <!-- Los medicamentos generados por IA aparecerán aquí como inputs editables -->
+                            <!-- Los medicamentos generados por IA aparecerán aquí -->
                         </div>
 
-                        <!-- Indicaciones Adicionales -->
                         <div class="mb-4">
                             <label class="form-label small text-muted fw-bold">Indicaciones Adicionales / Dieta</label>
                             <textarea class="form-control" id="receta-indicaciones" rows="3"></textarea>
