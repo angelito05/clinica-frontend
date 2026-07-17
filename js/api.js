@@ -1,6 +1,12 @@
 // js/api.js
 
-const BACKEND_URL = "http://127.0.0.1:8000";
+// Detectar si estamos en local (desarrollo) o en Vercel (producción)
+const IS_LOCAL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+
+// IMPORTANTE: Cuando despliegues tu backend, pega la URL final aquí abajo
+const PROD_BACKEND_URL = "https://clinica-inteligente.fly.dev";
+
+const BACKEND_URL = IS_LOCAL ? "http://127.0.0.1:8000" : PROD_BACKEND_URL;
 
 async function fetchAPI(endpoint, method = 'GET', body = null) {
     const headers = {};
